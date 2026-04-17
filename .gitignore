@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment
+.env
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Python build/test cache
+.pytest_cache/
+.mypy_cache/
+
+# Data outputs
+data/processed/
+
+# Local database or temp files
+*.sqlite3

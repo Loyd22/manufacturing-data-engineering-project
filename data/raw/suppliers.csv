@@ -1,0 +1,21 @@
+supplier_id,supplier_name,supplier_region,lead_time_days,status
+SUP001,Supplier 1,NCR,3,active
+SUP002,Supplier 2,CALABARZON,6,active
+SUP003,Supplier 3,NCR,13,active
+SUP004,Supplier 4,Davao,9,active
+SUP005,Supplier 5,NCR,4,active
+SUP006,Supplier 6,CALABARZON,11,active
+SUP007,Supplier 7,Davao,6,inactive
+SUP008,Supplier 8,CALABARZON,10,active
+SUP009,Supplier 9,NCR,5,inactive
+SUP010,Supplier 10,Central Luzon,7,active
+SUP011,Supplier 11,CALABARZON,8,active
+SUP012,Supplier 12,NCR,9,active
+SUP013,Supplier 13,Central Luzon,8,active
+SUP014,Supplier 14,NCR,14,inactive
+SUP015,Supplier 15,Davao,4,inactive
+SUP016,Supplier 16,NCR,11,active
+SUP017,Supplier 17,Davao,8,active
+SUP018,Supplier 18,NCR,3,active
+SUP019,Supplier 19,Central Luzon,4,active
+SUP020,Supplier 20,NCR,9,active
