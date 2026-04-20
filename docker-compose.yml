@@ -12,5 +12,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  app:
+    build: .
+    container_name: manufacturing_app
+    restart: "no"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python -m backend.orchestration.pipeline_flow
+
 volumes:
   postgres_data:
