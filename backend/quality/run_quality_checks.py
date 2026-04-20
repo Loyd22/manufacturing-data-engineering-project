@@ -1,33 +1,26 @@
 """
-This script runs all SQL data quality checks.
-
-What it does:
-- connects to PostgreSQL
-- executes each SQL check file
-- prints the result of each check
-- shows whether any issues were found
-
-Why this matters:
-- it helps us verify that the data is trustworthy
-- it makes the pipeline more production-style
+Run all SQL data quality checks.
 """
 
 from pathlib import Path
 import pandas as pd
 
 from backend.utils.db import get_engine
+from backend.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def run_check_file(engine, sql_file_path: str) -> pd.DataFrame:
     """
-    Run one SQL check file and return the results as a DataFrame.
+    Run one SQL check file and return the results.
     """
     path = Path(sql_file_path)
 
     if not path.exists():
         raise FileNotFoundError(f"SQL file not found: {sql_file_path}")
 
-    print(f"\nRunning check file: {sql_file_path}")
+    logger.info("Running check file: %s", sql_file_path)
 
     sql_text = path.read_text(encoding="utf-8")
     df = pd.read_sql(sql_text, engine)
@@ -39,7 +32,7 @@ def main() -> None:
     """
     Run all quality checks in sequence.
     """
-    print("Starting data quality checks...")
+    logger.info("Starting data quality checks")
 
     engine = get_engine()
 
@@ -53,26 +46,29 @@ def main() -> None:
 
     total_issues = 0
 
-    for check_file in check_files:
-        df = run_check_file(engine, check_file)
+    try:
+        for check_file in check_files:
+            df = run_check_file(engine, check_file)
 
-        print(df.to_string(index=False))
+            print(df.to_string(index=False))
 
-        file_issues = int(df["issue_count"].sum())
-        total_issues += file_issues
+            file_issues = int(df["issue_count"].sum())
+            total_issues += file_issues
 
-        if file_issues == 0:
-            print("Result: PASS")
+            if file_issues == 0:
+                logger.info("PASS: %s", check_file)
+            else:
+                logger.warning("FOUND %s issue(s) in %s", file_issues, check_file)
+
+        logger.info("Quality check summary | Total issues found: %s", total_issues)
+
+        if total_issues == 0:
+            logger.info("All quality checks passed")
         else:
-            print(f"Result: FOUND {file_issues} issue(s)")
-
-    print("\nQuality check summary")
-    print(f"Total issues found: {total_issues}")
-
-    if total_issues == 0:
-        print("All quality checks passed.")
-    else:
-        print("Some quality checks failed. Review the counts above.")
+            logger.warning("Some quality checks failed")
+    except Exception as error:
+        logger.exception("Quality checks failed: %s", error)
+        raise
 
 
 if __name__ == "__main__":

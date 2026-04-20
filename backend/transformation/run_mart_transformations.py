@@ -1,19 +1,13 @@
 """
-This script runs all mart transformation SQL files.
-
-What it does:
-- connects to PostgreSQL
-- reads each mart SQL file
-- executes them in order
-
-Why this matters:
-- marts become easy to refresh
-- dashboard tables can be rebuilt anytime
+Run all mart transformation SQL files.
 """
 
 from pathlib import Path
 
 from backend.utils.db import get_engine
+from backend.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def run_sql_file(engine, sql_file_path: str) -> None:
@@ -25,21 +19,21 @@ def run_sql_file(engine, sql_file_path: str) -> None:
     if not path.exists():
         raise FileNotFoundError(f"SQL file not found: {sql_file_path}")
 
-    print(f"Running: {sql_file_path}")
+    logger.info("Running SQL file: %s", sql_file_path)
 
     sql_text = path.read_text(encoding="utf-8")
 
     with engine.begin() as connection:
         connection.exec_driver_sql(sql_text)
 
-    print(f"Finished: {sql_file_path}")
+    logger.info("Finished SQL file: %s", sql_file_path)
 
 
 def main() -> None:
     """
-    Run all mart SQL files in order.
+    Run mart SQL files in order.
     """
-    print("Starting mart transformations...")
+    logger.info("Starting mart transformations")
 
     engine = get_engine()
 
@@ -52,10 +46,13 @@ def main() -> None:
         "sql/marts/mart_shipment_performance.sql",
     ]
 
-    for sql_file in sql_files:
-        run_sql_file(engine, sql_file)
-
-    print("Mart transformations completed successfully.")
+    try:
+        for sql_file in sql_files:
+            run_sql_file(engine, sql_file)
+        logger.info("Mart transformations completed successfully")
+    except Exception as error:
+        logger.exception("Mart transformations failed: %s", error)
+        raise
 
 
 if __name__ == "__main__":

@@ -1,19 +1,13 @@
 """
-This script runs all warehouse transformation SQL files.
-
-What it does:
-- connects to PostgreSQL
-- opens each SQL file
-- executes it in the correct order
-
-Why this is useful:
-- we do not have to run many SQL files manually
-- the transformation step becomes repeatable
+Run all warehouse transformation SQL files.
 """
 
 from pathlib import Path
 
 from backend.utils.db import get_engine
+from backend.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def run_sql_file(engine, sql_file_path: str) -> None:
@@ -25,21 +19,21 @@ def run_sql_file(engine, sql_file_path: str) -> None:
     if not path.exists():
         raise FileNotFoundError(f"SQL file not found: {sql_file_path}")
 
-    print(f"Running: {sql_file_path}")
+    logger.info("Running SQL file: %s", sql_file_path)
 
     sql_text = path.read_text(encoding="utf-8")
 
     with engine.begin() as connection:
         connection.exec_driver_sql(sql_text)
 
-    print(f"Finished: {sql_file_path}")
+    logger.info("Finished SQL file: %s", sql_file_path)
 
 
 def main() -> None:
     """
-    Run warehouse SQL transformations in the correct order.
+    Run warehouse SQL files in the correct order.
     """
-    print("Starting warehouse transformations...")
+    logger.info("Starting warehouse transformations")
 
     engine = get_engine()
 
@@ -55,10 +49,13 @@ def main() -> None:
         "sql/warehouse/fact_machine_logs.sql",
     ]
 
-    for sql_file in sql_files:
-        run_sql_file(engine, sql_file)
-
-    print("Warehouse transformations completed successfully.")
+    try:
+        for sql_file in sql_files:
+            run_sql_file(engine, sql_file)
+        logger.info("Warehouse transformations completed successfully")
+    except Exception as error:
+        logger.exception("Warehouse transformations failed: %s", error)
+        raise
 
 
 if __name__ == "__main__":
